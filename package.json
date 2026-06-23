@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "algoliasearch": "^4.27.0",
-    "algoliasearch-helper": "^3.29.1"
+    "algoliasearch-helper": "^3.29.1",
+    "dotenv": "^17.4.2"
   }
 }
