@@ -293,4 +293,173 @@ code {
     right: 0;
     border-right-color: var(--border);
   }
+
+#facets {
+  margin-bottom: 1rem;
+}
+
+.facet-item {
+  cursor: pointer;
+  padding: 2px 0;
+  list-style: none;
+}
+
+.facet-item.active {
+  font-weight: bold;
+  color: #e00;
+}
+
+#near-me-btn {
+  cursor: pointer;
+  padding: 0.4rem 0.9rem;
+  border: 2px solid #ccc;
+  border-radius: 999px;
+  background: white;
+  font-size: 0.9rem;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+#near-me-btn.active {
+  background: #003dff;
+  color: white;
+  border-color: #003dff;
+}
+
+#city-select {
+  padding: 0.4rem 0.6rem;
+  border: 2px solid #ccc;
+  border-radius: 999px;
+  background: white;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+}
+
+#curated-shelves {
+  margin-bottom: 2rem;
+}
+
+.shelf {
+  margin-bottom: 1.5rem;
+}
+
+.shelf__title {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.shelf__items {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+}
+
+.shelf-card {
+  min-width: 200px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.75rem;
+  flex-shrink: 0;
+}
+
+.shelf-card__name {
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.shelf-card__meta {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.shelf-card__rating {
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+
+  /* Stack sidebar above results instead of side-by-side */
+  .app-layout {
+    flex-direction: column;
+  }
+
+  /* Full width sidebar */
+  .sidebar {
+    width: 100%;
+  }
+
+  /* Single column results grid */
+  .results-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Shelf cards slightly smaller */
+  .shelf-card {
+    min-width: 160px;
+  }
+
+  /* Sort pills wrap instead of overflow */
+  .sort-pills {
+    flex-wrap: wrap;
+  }
+
+  #search-input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  #near-me-btn {
+    width: 100%;
+  }
+
+  #city-select {
+    width: 100%;
+  }
+
+  .filter-toggle-btn {
+    display: block;
+    width: 100%;
+    padding: 0.6rem;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  #facets {
+    display: none;
+  }
+
+  #facets.filters-open {
+    display: block !important;
+  }
+
+  /* Tap targets */
+  .facet-item {
+    padding: 8px 4px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  .sort-pill {
+    padding: 10px 14px;
+    min-height: 44px;
+  }
+
+  #load-more {
+    padding: 14px;
+    min-height: 44px;
+    width: 100%;
+  }
+
+}
+
+@media (min-width: 769px) {
+  .filter-toggle-btn {
+    display: none;
+  }
 }

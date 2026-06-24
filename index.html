@@ -7,29 +7,105 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="./assets/favicon.ico" type="image/png" />
     <link rel="stylesheet" href="index.css" />
+    <style>
+      .result__title em {
+        font-style: normal;
+        font-weight: 900;
+        color: #e00;
+      }
+  </style>
   </head>
 
   <body>
     <!-- INTERFACE -->
     <div class="page">
-      <div class="page__container"></div>
+      <div class="page__container">
+        <button id="filter-toggle" class="filter-toggle-btn">🔽 Filters</button>
+        <div id="facets">
+          <div id="cuisine-facet">
+            <h3>Cuisine</h3>
+            <input type="text" id="cuisine-search" placeholder="Search cuisines..." />
+            <ul id="cuisine-list"></ul>
+          </div>
+
+          <div id="price-facet">
+            <h3>Price</h3>
+            <ul id="price-list"></ul>
+          </div>
+
+          <div id="dining-facet">
+            <h3>Dining Style</h3>
+            <ul id="dining-list"></ul>
+          </div>
+
+          <div id="payment-facet">
+            <h3>Payment</h3>
+            <ul id="payment-list"></ul>
+          </div>
+
+          <div id="badges-facet">
+            <h3>Badges</h3>
+            <ul id="badges-list"></ul>
+          </div>
+        </div>
+        <input type="text" id="search-input" placeholder="Search restaurants..." />
+        <button id="near-me-btn" aria-pressed="false">📍 Near me</button>
+        <select id="city-select">
+          <option value="">📍 All cities</option>
+          <option value="40.7128,-74.0060">New York</option>
+          <option value="37.7749,-122.4194">San Francisco</option>
+          <option value="41.8781,-87.6298">Chicago</option>
+          <option value="34.0522,-118.2437">Los Angeles</option>
+          <option value="42.3601,-71.0589">Boston</option>
+          <option value="47.6062,-122.3321">Seattle</option>
+          <option value="29.7604,-95.3698">Houston</option>
+          <option value="33.4484,-112.0740">Phoenix</option>
+        </select>
+        <span id="stats" class="stats"></span>
+        <div class="sort-wrapper">
+          <span class="sort-label">Sort:</span>
+          <div class="sort-pills" id="sort-pills">
+            <button class="sort-pill active" data-sort="relevance">Best match</button>
+            <button class="sort-pill" data-sort="popular">Most popular</button>
+            <button class="sort-pill" data-sort="rating">Highest rated</button>
+            <button class="sort-pill" data-sort="price">Price ↑</button>
+          </div>
+        </div>
+
+        <div id="curated-shelves">
+          <div class="shelf" id="shelf-hidden-gems">
+            <h3 class="shelf__title">💎 Hidden Gems</h3>
+            <div class="shelf__items"></div>
+          </div>
+          <div class="shelf" id="shelf-highly-rated">
+            <h3 class="shelf__title">⭐ Highly Rated</h3>
+            <div class="shelf__items"></div>
+          </div>
+        </div>
+
+        <h2 class="results-heading">Popular Restaurants</h2>
+        <div id="hits"></div>
+        <button id="load-more">Load more</button>
+      </div>
     </div>
     <!-- /INTERFACE -->
 
     <!-- TEMPLATES -->
     <script type="text/html" id="result-template">
       <div class="results__item">
-      	<div class="result">
-      		<div class="result__image-container">
-      		</div>
-      		<div class="result__text-container">
-      			<h1 class="result__title">{{name}}</h1>
-      			<p class="result__summary">{{food_type}} | {{neighborhood}} | {{price_range}}</p>
-      		</div>
-      	</div>
+        <div class="result">
+          <div class="result__image-container">
+          </div>
+          <div class="result__text-container">
+            <h1 class="result__title">{{name}}</h1>
+            <p class="result__summary">{{food_type}} | {{neighborhood}} | {{price_range}}</p>
+            <p class="result__address">{{address}}</p>
+            <p class="result__rating">⭐ {{stars_count}} ({{reviews_count}} reviews)</p>
+          </div>
+        </div>
       </div>
     </script>
-
+    
     <script type="text/html" id="no-results-template">
       <div id="no-results-message">
       	<p>We didn't find any results for the search <em>"{{query}}"</em>.</p>
