@@ -21,7 +21,9 @@ The demo is built on a dataset of ~5,000 US restaurants, using the Algolia JS He
 
 ---
 
-## How to run locally
+## Set up instructions to run locally
+
+If the live link does not work or you would prefer to run this locally on your machine please follow these instructions. 
 
 ### Prerequisites
 
