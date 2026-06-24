@@ -3,120 +3,173 @@
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-    <title>Restaurant Locator - by Algolia</title>
+    <title>Restaurant Search — OpenTable × Algolia</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="./assets/favicon.ico" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="index.css" />
     <style>
       .result__title em {
         font-style: normal;
-        font-weight: 900;
-        color: #e00;
+        font-weight: 700;
+        color: #e8523a;
+        background: rgba(232,82,58,0.08);
+        border-radius: 2px;
+        padding: 0 1px;
       }
-  </style>
+    </style>
   </head>
 
   <body>
-    <!-- INTERFACE -->
-    <div class="page">
-      <div class="page__container">
-        <button id="filter-toggle" class="filter-toggle-btn">🔽 Filters</button>
-        <button id="clear-filters" class="clear-filters-btn" style="display:none">✕ Clear all filters</button>
-        <div id="facets">
-          <div id="cuisine-facet">
-            <h3>Cuisine</h3>
-            <input type="text" id="cuisine-search" placeholder="Search cuisines..." />
-            <ul id="cuisine-list"></ul>
-          </div>
+    <div class="app">
 
-          <div id="price-facet">
-            <h3>Price</h3>
-            <ul id="price-list"></ul>
-          </div>
-
-          <div id="dining-facet">
-            <h3>Dining Style</h3>
-            <ul id="dining-list"></ul>
-          </div>
-
-          <div id="payment-facet">
-            <h3>Payment</h3>
-            <ul id="payment-list"></ul>
-          </div>
-
-          <div id="badges-facet">
-            <h3>Badges</h3>
-            <ul id="badges-list"></ul>
+      <!-- HEADER -->
+      <header class="header">
+        <div class="header__brand">
+          <span class="header__logo">🍽</span>
+          <span class="header__title">OpenTable <span class="header__powered">× Algolia</span></span>
+        </div>
+        <div class="header__search">
+          <div class="search-box">
+            <svg class="search-box__icon" viewBox="0 0 20 20" fill="none">
+              <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M13 13l3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            <input type="text" id="search-input" class="search-box__input" placeholder="Search restaurants, cuisines, neighbourhoods…" autocomplete="off" />
           </div>
         </div>
-        <input type="text" id="search-input" placeholder="Search restaurants..." />
-        <button id="near-me-btn" aria-pressed="false">📍 Near me</button>
-        <select id="city-select">
-          <option value="">📍 All cities</option>
-          <option value="40.7128,-74.0060">New York</option>
-          <option value="37.7749,-122.4194">San Francisco</option>
-          <option value="41.8781,-87.6298">Chicago</option>
-          <option value="34.0522,-118.2437">Los Angeles</option>
-          <option value="42.3601,-71.0589">Boston</option>
-          <option value="47.6062,-122.3321">Seattle</option>
-          <option value="29.7604,-95.3698">Houston</option>
-          <option value="33.4484,-112.0740">Phoenix</option>
-        </select>
-        <span id="stats" class="stats"></span>
-        <div class="sort-wrapper">
-          <span class="sort-label">Sort:</span>
-          <div class="sort-pills" id="sort-pills">
-            <button class="sort-pill active" data-sort="relevance">Best match</button>
-            <button class="sort-pill" data-sort="popular">Most popular</button>
-            <button class="sort-pill" data-sort="rating">Highest rated</button>
-            <button class="sort-pill" data-sort="price">Price ↑</button>
-          </div>
+        <div class="header__actions">
+          <button id="near-me-btn" class="btn btn--ghost" aria-pressed="false">
+            <svg viewBox="0 0 20 20" fill="none" width="14" height="14"><circle cx="10" cy="9" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M10 2C6.686 2 4 4.686 4 8c0 4.5 6 10 6 10s6-5.5 6-10c0-3.314-2.686-6-6-6z" stroke="currentColor" stroke-width="1.8"/></svg>
+            Near me
+          </button>
+          <select id="city-select" class="city-select">
+            <option value="">All cities</option>
+            <option value="40.7128,-74.0060">New York</option>
+            <option value="37.7749,-122.4194">San Francisco</option>
+            <option value="41.8781,-87.6298">Chicago</option>
+            <option value="34.0522,-118.2437">Los Angeles</option>
+            <option value="42.3601,-71.0589">Boston</option>
+            <option value="47.6062,-122.3321">Seattle</option>
+            <option value="29.7604,-95.3698">Houston</option>
+            <option value="33.4484,-112.0740">Phoenix</option>
+          </select>
         </div>
+      </header>
 
-        <div id="curated-shelves">
-          <div class="shelf" id="shelf-hidden-gems">
-            <h3 class="shelf__title">💎 Hidden Gems</h3>
-            <div class="shelf__items"></div>
-          </div>
-          <div class="shelf" id="shelf-highly-rated">
-            <h3 class="shelf__title">⭐ Highly Rated</h3>
-            <div class="shelf__items"></div>
-          </div>
-        </div>
+      <div class="layout">
 
-        <h2 class="results-heading">Popular Restaurants</h2>
-        <div id="hits"></div>
-        <button id="load-more">Load more</button>
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="facets">
+          <div class="sidebar__header">
+            <span class="sidebar__title">Filters</span>
+            <button id="clear-filters" class="btn btn--clear" style="display:none">Clear all</button>
+          </div>
+
+          <!-- Cuisine: stays as-is (searchable list) -->
+          <div class="facet-group" id="cuisine-facet">
+            <h3 class="facet-group__title">Cuisine</h3>
+            <input type="text" id="cuisine-search" class="facet-search" placeholder="Search cuisines…" />
+            <ul id="cuisine-list" class="facet-list facet-list--scrollable"></ul>
+          </div>
+
+          <!-- Price -->
+          <div class="facet-group" id="price-facet">
+            <h3 class="facet-group__title">Price</h3>
+            <ul id="price-list" class="facet-list"></ul>
+          </div>
+
+          <!-- Dining Style -->
+          <div class="facet-group" id="dining-facet">
+            <h3 class="facet-group__title">Dining Style</h3>
+            <ul id="dining-list" class="facet-list"></ul>
+          </div>
+
+          <!-- Payment -->
+          <div class="facet-group" id="payment-facet">
+            <h3 class="facet-group__title">Payment</h3>
+            <ul id="payment-list" class="facet-list"></ul>
+          </div>
+
+          <!-- Badges -->
+          <div class="facet-group" id="badges-facet">
+            <h3 class="facet-group__title">Badges</h3>
+            <ul id="badges-list" class="facet-list"></ul>
+          </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main">
+
+          <!-- Toolbar -->
+          <div class="toolbar">
+            <span id="stats" class="toolbar__stats"></span>
+            <div class="sort-pills" id="sort-pills">
+              <button class="sort-pill active" data-sort="relevance">Best match</button>
+              <button class="sort-pill" data-sort="popular">Most popular</button>
+              <button class="sort-pill" data-sort="rating">Highest rated</button>
+              <button class="sort-pill" data-sort="price">Price ↑</button>
+            </div>
+          </div>
+
+          <!-- Curated shelves -->
+          <div id="curated-shelves">
+            <div class="shelf" id="shelf-hidden-gems">
+              <h3 class="shelf__title">💎 Hidden Gems</h3>
+              <div class="shelf__items"></div>
+            </div>
+            <div class="shelf" id="shelf-highly-rated">
+              <h3 class="shelf__title">⭐ Highly Rated</h3>
+              <div class="shelf__items"></div>
+            </div>
+          </div>
+
+          <!-- Results -->
+          <h2 class="results-heading" id="results-heading">Popular Restaurants</h2>
+          <div id="hits" class="hits-grid"></div>
+          <div class="load-more-wrap">
+            <button id="load-more" class="btn btn--load-more">Load more results</button>
+          </div>
+
+        </main>
       </div>
+
+      <!-- Mobile filter toggle -->
+      <button id="filter-toggle" class="filter-fab">
+        <svg viewBox="0 0 20 20" fill="none" width="18" height="18"><path d="M2 5h16M5 10h10M8 15h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Filters
+      </button>
     </div>
-    <!-- /INTERFACE -->
 
     <!-- TEMPLATES -->
     <script type="text/html" id="result-template">
-      <div class="results__item">
-        <div class="result">
-          <div class="result__image-container">
-          </div>
-          <div class="result__text-container">
-            <h1 class="result__title">{{name}}</h1>
-            <p class="result__summary">{{food_type}} | {{neighborhood}} | {{price_range}}</p>
-            <p class="result__address">{{address}}</p>
-            <p class="result__rating">⭐ {{stars_count}} ({{reviews_count}} reviews)</p>
+      <div class="hit-card">
+        <div class="hit-card__image-wrap">
+          <div class="hit-card__image-placeholder"></div>
+        </div>
+        <div class="hit-card__body">
+          <h2 class="hit-card__name">{{name}}</h2>
+          <p class="hit-card__meta">{{food_type}} · {{neighborhood}}</p>
+          <p class="hit-card__address">{{address}}</p>
+          <div class="hit-card__footer">
+            <span class="hit-card__rating">⭐ {{stars_count}} <span class="hit-card__reviews">({{reviews_count}} reviews)</span></span>
+            <span class="hit-card__price">{{price_range}}</span>
           </div>
         </div>
       </div>
     </script>
-    
+
     <script type="text/html" id="no-results-template">
-      <div id="no-results-message">
-      	<p>We didn't find any results for the search <em>"{{query}}"</em>.</p>
-      	<a href="." class='clear-all'>Clear search</a>
+      <div class="no-results">
+        <div class="no-results__icon">🔍</div>
+        <p class="no-results__title">No results for "<em>{{query}}</em>"</p>
+        <p class="no-results__sub">Try a different spelling or broaden your search.</p>
+        <a href="." class="btn btn--primary">Clear search</a>
       </div>
     </script>
-    <!-- /TEMPLATES -->
 
-    <!-- SCRIPTS -->
     <script type="module" src="/src/main.js"></script>
-    <!-- /SCRIPTS -->
   </body>
 </html>
