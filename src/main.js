@@ -272,3 +272,19 @@ document.addEventListener("DOMContentLoaded", () => {
     filterToggle.textContent = isOpen ? "🔼 Hide Filters" : "🔽 Filters";
   });
 });
+
+// --- CLEAR ALL FILTERS ---
+const clearBtn = document.getElementById("clear-filters");
+
+clearBtn.addEventListener("click", () => {
+  helper.clearRefinements().setQuery("").search();
+  document.getElementById("search-input").value = "";
+  clearBtn.style.display = "none";
+});
+
+// Show the button whenever a refinement is active
+helper.on("result", () => {
+  const hasRefinements = helper.state.disjunctiveFacetsRefinements &&
+    Object.values(helper.state.disjunctiveFacetsRefinements).some(v => v.length > 0);
+  clearBtn.style.display = hasRefinements ? "block" : "none";
+});
