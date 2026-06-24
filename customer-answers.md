@@ -15,7 +15,7 @@ A record is a single item in your Algolia index. For OpenTable, each restaurant 
 Indexing is the process of sending your records to Algolia so it can organise and store them in a way that enables near-instant search. Once indexed, Algolia can search across thousands of restaurant records and return results in single-digit milliseconds. There are no servers for you to manage — Algolia handles all of that infrastructure.
 
 **What are custom ranking metrics?**
-By default, Algolia ranks results by how well the search query matches each record. Custom ranking lets you break ties using signals that matter to your business. For OpenTable, that means surfacing restaurants with the strongest combination of star rating and review volume — so when two restaurants both match "Italian in Manhattan," the genuinely popular and well-reviewed one appears first, not just the one whose name happens to be a closer text match.
+By default, Algolia ranks results by how well the search query matches each record. Custom ranking lets you choose what you would like the ranking metric to be. For OpenTable, that means surfacing restaurants with the strongest combination of star rating and review volume — so when two restaurants both match "Italian in Manhattan," the genuinely popular and well-reviewed one appears first, not just the one whose name happens to be a closer text match.
 
 One important nuance: a restaurant with a 4.9-star rating from 3 reviews should not outrank one with a 4.5 average from 4,000 reviews. A review-count-weighted score handles this correctly and keeps results trustworthy for your users.
 
@@ -53,6 +53,8 @@ These take effect immediately and are a single command — no navigation require
 
 I'll make sure your dashboard feedback gets to the product team with enough detail to be actionable. If you can share the specific steps that feel slow, that will help make the report as useful as possible.
 
+**The examples above are in JavaScript — if you're working in a different language, I can share the equivalent for Python, PHP, or whichever client you're using.**
+
 **References:**
 - [Algolia CLI commands](https://www.algolia.com/doc/tools/cli/commands/algolia-settings/)
 - [Send and update your data](https://www.algolia.com/doc/guides/sending-and-managing-data/send-and-update-your-data)
@@ -63,21 +65,23 @@ I'll make sure your dashboard feedback gets to the product team with enough deta
 
 Hi Leo,
 
-Good news — integrating Algolia is typically lighter than teams expect, and you don't need to do everything at once. It's incremental at every stage.
+Good news ntegrating Algolia is generally straightforward, and you don't need to do everything at once.
 
 Here's the high-level process:
 
-1. **Structure your data into records.** Shape your existing data into JSON objects — one record per item. Each record contains the attributes Algolia needs to find, rank, and display it. For OpenTable, that means one record per restaurant with name, cuisine, location, price, and rating.
+1. **Prepare your data.** Take the information you already have and organise it so Algolia can read it — one record per item, containing the details you want users to be able to search by, such as a name, category, or price.
 
-2. **Push records to an Algolia index.** Send the records to Algolia using the API or one of the official client libraries (JavaScript, Python, and others are available). Algolia hosts everything — there are no servers to provision or maintain on your end.
+2. **Send your data to Algolia.** Once your data is ready, you upload it to Algolia. Algolia stores and manages everything on its end — you don't need to set up any servers.
 
-3. **Configure relevance.** Set which attributes are searchable, which are used for filtering, and how results should be ranked. This is where you shape the quality of the experience — and it can be adjusted at any time without re-indexing.
+3. **Set up your search settings.** Tell Algolia which fields users can search by, and how results should be ordered. This can be changed at any time without having to start over.
 
-4. **Build the search UI.** Connect your front end to Algolia using the search client. This can be as lightweight or as rich as you need — from a basic search box to a full discovery interface with filters, geo-ranking, and sorting.
+4. **Add search to your website.** Connect Algolia to your website's front end. This can be as simple as a basic search box, or more advanced with filters and sorting — it's up to you.
 
-5. **Test, tune, and ship.** Try representative searches, inspect the results, adjust your configuration where needed, and deploy. Algolia's dashboard makes it straightforward to experiment with relevance settings without touching code.
+5. **Test and launch.** Try out some searches, make any adjustments, and go live.
 
-Most teams have a working prototype within a day or two. Production integration depends on data complexity and front-end scope, but because the infrastructure is fully hosted, you are never blocked waiting on servers or infrastructure setup.
+Most people have something working within a day or two. How long the full build takes depends on how much data you have and how you want search to look on your site.
+
+Please have a look at the links below.
 
 **References:**
 - [Send and update your data](https://www.algolia.com/doc/guides/sending-and-managing-data/send-and-update-your-data)
