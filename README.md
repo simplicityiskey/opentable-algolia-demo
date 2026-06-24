@@ -64,25 +64,6 @@ Go to `http://localhost:5173` in your browser.
 
 ---
 
-## Data setup (one-time)
-
-The indexing script requires your Admin API key. Add it to your `.env` file (never commit this):
-
-```
-ALGOLIA_ADMIN_KEY=your_admin_key
-```
-
-Then run:
-
-```bash
-node index-data.js
-```
-
-This joins the two dataset files, normalises the data, and pushes ~5,000 records to your Algolia index with all relevance settings applied.
-
----
-
-
 ## Approach & trade-offs
 
 The provided mock-up shows OpenTable's current Elasticsearch experience. Rather than
