@@ -118,10 +118,6 @@ goal — turning more search and browsing sessions into bookings.
 - Reworked the filter UI — moved price, dining-style, payment, and badge filters into
   collapsible dropdowns and capped long facet lists with a "show more" toggle, keeping cuisine
   as a searchable list — after the initial flat layout surfaced every value at once.
-- [PENDING YOUR ANSWER — popularity score: testing surfaced casino-chain restaurants leading
-  the popular shelf despite low review counts; EITHER "so I raised the review weighting / m
-  threshold, after which well-reviewed places led correctly" OR move this bullet to the
-  "left out" section as a documented limitation.]
 
 ### Key assumptions & judgment calls
 
