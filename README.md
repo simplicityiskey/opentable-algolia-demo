@@ -3,6 +3,7 @@
 A restaurant search and discovery prototype built for the Algolia Solutions Engineer hiring assignment. Demonstrates how Algolia could help OpenTable replace their ageing Elasticsearch stack with a faster, more modern search and discovery experience.
 
 **Live demo:** https://calebopentable.netlify.app/
+
 **Repository:** https://github.com/simplicityiskey/opentable-algolia-demo
 
 ---
