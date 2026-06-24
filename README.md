@@ -147,5 +147,4 @@ Where the brief was silent, I made and documented these calls:
 ### On AI assistance
 
 I used AI assistance to accelerate implementation, and reviewed and adapted all output against
-the brief's constraints — JS Helper only, no InstantSearch, no fork. I can explain the
-architecture, trade-offs, and every data transformation behind what I built.
+the brief's constraints — JS Helper only, no InstantSearch, no fork. 
