@@ -31,13 +31,15 @@ function renderHits(hits) {
   const html = hits.map(hit => {
     return template
       .replace("{{name}}", hit._highlightResult?.name?.value || hit.name || "")
-      .replace("{{food_type}}", hit.food_type || "")
-      .replace("{{neighborhood}}", hit.neighborhood || "")
+      .replace("{{food_type}}", hit._highlightResult?.food_type?.value || hit.food_type || "")
+      .replace("{{neighborhood}}", hit._highlightResult?.neighborhood?.value || hit.neighborhood || "")
       .replace("{{price_range}}", hit.price_range || "")
       .replace("{{address}}", hit.address || "")   
       .replace("{{city}}", hit.city || "")        
       .replace("{{stars_count}}", hit.stars_count || "")
-      .replace("{{reviews_count}}", hit.reviews_count || "");
+      .replace("{{reviews_count}}", hit.reviews_count || "")
+      .replace("{{image_url}}", hit.image_url || "")
+      .replace("{{objectID}}", hit.objectID || "");
   }).join("");
 
   if (isLoadingMore) {
@@ -45,6 +47,15 @@ function renderHits(hits) {
   } else {
     container.innerHTML = html;
   }
+
+    // Fix broken images
+  container.querySelectorAll("img[data-src]").forEach(img => {
+    img.src = img.dataset.src;
+    img.onerror = () => {
+      img.src = `https://source.unsplash.com/400x300/?restaurant,food&sig=${img.dataset.id}`;
+      img.onerror = null;
+    };
+  });
 }
 
 function renderCuisineFacet(results) {
@@ -128,8 +139,12 @@ helper.on("error", (err) => {
 
 const searchInput = document.getElementById("search-input");
 
+let debounceTimer;
 searchInput.addEventListener("input", (e) => {
-  helper.setQuery(e.target.value).search();
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    helper.setQuery(e.target.value).search();
+  }, 200);
 });
 
 const cuisineSearch = document.getElementById("cuisine-search");
