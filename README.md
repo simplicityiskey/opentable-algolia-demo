@@ -30,28 +30,37 @@ If the live link does not work or you would prefer to run this locally on your m
 - Node.js 18 or higher ([download](https://nodejs.org))
 - An Algolia account with the index already populated (see Data setup below)
 
-### Steps
+### Setup
 
-
+### Step 1 — Clone the project
+```bash
 git clone https://github.com/simplicityiskey/opentable-algolia-demo
+```
+
+### Step 2 — Navigate into the project folder
+```bash
 cd open-table-algolia-demo
+```
+
+### Step 3 — Install dependencies
+```bash
 npm install
 ```
 
-Create an `.env` file in the root of the project (copy `.env.example`):
-
+### Step 4 — Set up your environment variables
+Copy `.env.example` and rename it to `.env`, then fill in your Algolia credentials:
 ```
 VITE_ALGOLIA_APP_ID=your_app_id
 VITE_ALGOLIA_SEARCH_KEY=your_search_only_key
 ```
 
-Start the dev server:
-
+### Step 5 — Start the development server
 ```bash
 npm run dev
 ```
 
-Open http://localhost:5173
+### Step 6 — Open the app
+Go to `http://localhost:5173` in your browser.
 
 ---
 
