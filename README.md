@@ -82,122 +82,74 @@ This joins the two dataset files, normalises the data, and pushes ~5,000 records
 
 ---
 
-## Data preparation
-
-The dataset is split across two files:
-
-- `restaurants_list.json` — ~5,000 records with name, address, geolocation, and payment options
-- `restaurants_info.csv` — additional fields (cuisine, stars, reviews, dining style) keyed by `objectID`
-
-### How the files were joined
-
-Both files share `objectID` as a common key. 
-The preparation script performs a 1:1 join on this field.
-All 5,000 records match cleanly with no orphans.
-
-
-### What transformations were performed
-- **Payment normalisation:** The brief specifies four allowed values. The script keeps Visa, MasterCard, American Express, and Discover; merges Diners Club and Carte Blanche into Discover; and drops JCB, Cash Only, and Pay with OpenTable entirely.
-- **Price field:** Where the numeric `price` field (1–4) and the text `price_range` field disagreed on ~300 records, the numeric field was treated as canonical for the `$`–`$$$$` display tier.
-- **Popularity score:** Each record receives a Bayesian (review-count-weighted) star rating using a credibility threshold of m=50 and the dataset mean (4.29) as the prior. This prevents a 4.9-star restaurant with 3 reviews from outranking a 4.5-star restaurant with 4,000 reviews.
-- **Badges:** Records are tagged with `Hidden Gem` (high score, lower review count) and `Highly Rated` (high score, high review count) to power curated discovery shelves.
-
-### Which attributes were indexed
-All fields needed to support search, filtering, display, and ranking: `name`, `food_type`, `cuisine`, `neighborhood`, `city`, `area`, `state`, `address`, `price_tier`, `price_range`, `dining_style`, `payment_methods`, `stars_count`, `reviews_count`, `popularity_score`, `badges`, `_geoloc`, `objectID`.
-
-### Which attributes were made searchable, facetable, or ranking-related
-See the Search configuration section below.
-
-### Assumptions made about the data
-- Diners Club and Carte Blanche treated as Discover per the brief
-- JCB, Cash Only, and Pay with OpenTable dropped as they are not in the four allowed values
-- Numeric `price` field treated as canonical where it conflicts with `price_range` text
-- All 114 `food_type` values kept as-is — handled with a searchable facet rather than manual consolidation
-- Popularity score credibility threshold set at m=50 so restaurants need a meaningful number of reviews before their rating is fully trusted
-- Default location set to New York — the dataset is US-only and NY-heavy, so this ensures the demo looks good wherever a reviewer opens it
-
----
-
-## Search configuration
-
-### Searchable attributes (in priority order)
-1. `name` (unordered) known-item users search by name; `unordered` means a match anywhere in the name scores equally
-2. `cuisine` the primary discovery dimension
-3. `neighborhood`, `city`, `area` (same tier) this was used to help disambiguate chain locations
-
-### Custom ranking
-
-`desc(popularity_score)`, then `desc(reviews_count)` as tiebreaker. Applied after text relevance so a highly-reviewed restaurant wins ties but does not beat an exact name match.
-
-### Facets
-
-- `cuisine` — searchable facet (114 values; users can type to filter the list)
-- `price_tier`, `dining_style`, `payment_methods`, `badges` — disjunctive (OR within a facet, AND across facets)
-- `city`, `neighborhood` — searchable facets for location browsing
-- `state` — filterOnly
-
-### Query behaviour
-
-- `typoTolerance: true` — critical for hard-to-spell restaurant names
-- `queryType: prefixLast` — enables as-you-type results
-- `removeWordsIfNoResults: allOptional` — partial or awkward queries still return results
-- `ignorePlurals: true` — "steakhouses" matches "steakhouse"
-- `minWordSizefor1Typo: 4`, `minWordSizefor2Typos: 8`
-
-### Geo-search fallback chain
-
-1. Browser geolocation (precise, user-triggered via "Near me" button)
-2. IP-based location (`aroundLatLngViaIP`) if permission is denied
-3. Manual city selector (also useful for planning trips to other cities)
-4. No location — falls back to relevance + popularity ranking; never broken, never empty
-
-### Sort options
-
-Implemented via replica indices:
-
-| Option | Replica index | Ranking |
-|---|---|---|
-| Best match | `restaurants` | Default relevance |
-| Most popular | `restaurants_popular_desc` | `desc(popularity_score)` |
-| Highest rated | `restaurants_rating_desc` | `desc(stars_count)` |
-| Price | `restaurants_price_asc` | `asc(price_tier)` |
-
----
 
 ## Approach & trade-offs
 
-### What I built and why
-
-The provided mock-up represents OpenTable's current Elasticsearch experience. Rather than recreating it, I focused on directly addressing their stated pain points and business goals:
+The provided mock-up shows OpenTable's current Elasticsearch experience. Rather than
+recreating it, I built directly against their stated pain points and their core business
+goal — turning more search and browsing sessions into bookings.
 
 | OpenTable pain point | How this demo addresses it |
 |---|---|
-| Hard-to-spell names, typos, partial names | Typo tolerance configured for 1 and 2 typos; prefix search enabled |
-| Multiple chain locations in the same city | Every card shows cuisine, neighbourhood, and address for clear disambiguation |
-| Discovery experience doesn't support browsing | Curated shelves (Hidden Gems, Highly Rated), disjunctive facets, empty-state shows popular restaurants |
-| Feels less modern than consumer platforms | Clean card UI, as-you-type search, sort options, mobile-responsive layout with filter drawer |
+| Hard-to-spell names, typos, partial names, alternate spellings | Typo tolerance (1 typo at ≥4 chars, 2 at ≥8), `queryType: prefixLast` for as-you-type, and `removeWordsIfNoResults: allOptional` so partial or awkward queries still return results |
+| Multiple chain locations in the same city | Every result card shows neighbourhood, city, and street address beside the name, so identical chain names are immediately distinguishable |
+| Discovery isn't supported; few ways to browse or get inspired | A searchable cuisine facet (114 values), disjunctive price / dining-style / payment / badge filters, curated "Hidden Gems" and "Highly Rated" shelves, and an empty-query state that surfaces the most popular restaurants |
+| Feels less modern than consumer platforms | Clean card UI, instant as-you-type results with a live result count and timing, replica-backed sort options, and a mobile-responsive layout with a collapsible filter drawer |
 
 ### What I prioritised
 
-- Ranking quality first — the weighted popularity score is the single most impactful thing for perceived result quality
-- Two-persona design throughout — every feature decision was asked "does this help someone book a table?"
-- Geo fallback chain — so the demo works gracefully for any reviewer regardless of location or browser permissions
+- **Relevance quality first.** The popularity score is the single biggest lever on perceived
+  quality, so I built it as a Bayesian (review-count-weighted) star rating — credibility
+  threshold `m = 50`, dataset mean (4.29) as the prior — so a 4.9-from-3-reviews place can't
+  outrank a 4.5-from-4,000. It lives in `customRanking` (with `reviews_count` as a second
+  tie-breaker), beneath Algolia's text relevance rather than overriding it.
+- **Both personas in every decision.** Name-first `searchableAttributes` and typo tolerance
+  serve the known-item user; the facets, shelves, and populated empty state serve the
+  discovery user. The test for every feature was "does this help someone book a table?"
+- **A geo fallback that never dead-ends.** Browser location → IP-based location → manual city
+  selector → popularity ranking, with `aroundRadius: 'all'` so distance influences ranking
+  without hard-excluding far-away restaurants. The demo stays useful for any reviewer,
+  regardless of location or whether they grant permission.
 
-### What I left out for time
+### What I changed during testing
 
-- Analytics events — in production, click and booking conversion data would feed back into ranking signals; `bookings_count` per restaurant would be the ideal custom ranking signal for OpenTable
-- A/B testing configuration
+- Expanded the result cards from name / cuisine / price to also include neighbourhood, city,
+  and street address, after testing showed chain locations weren't distinguishable.
+- Reworked the filter UI — moved price, dining-style, payment, and badge filters into
+  collapsible dropdowns and capped long facet lists with a "show more" toggle, keeping cuisine
+  as a searchable list — after the initial flat layout surfaced every value at once.
+- [PENDING YOUR ANSWER — popularity score: testing surfaced casino-chain restaurants leading
+  the popular shelf despite low review counts; EITHER "so I raised the review weighting / m
+  threshold, after which well-reviewed places led correctly" OR move this bullet to the
+  "left out" section as a documented limitation.]
+
+### Key assumptions & judgment calls
+
+Where the brief was silent, I made and documented these calls:
+
+- **Payments** — exposed only the four allowed values; folded Diners Club and Carte Blanche
+  into Discover per the brief; dropped JCB, Cash Only, and Pay with OpenTable as unsupported.
+- **Conflicting price fields** — the numeric `price` (1–4) and text `price_range` disagree on
+  ~300 records; I treated the numeric field as canonical for the `$`–`$$$$` tier.
+- **Cuisine granularity** — kept all 114 `food_type` values rather than inventing a taxonomy,
+  and handled the long list with a searchable facet (type "ita" → "Italian").
+- **Ranking constant** — `m = 50` means a restaurant needs a meaningful review count before
+  its rating is fully trusted; a lower value rewards emerging spots more, a higher one favours
+  established ones.
+- **Default location** — the data is US-only and NY-heavy, so the demo defaults to New York to
+  show well wherever it's opened.
+- **Dead media URLs** — some dataset image and booking URLs return 404s, so I added a fallback
+  image to keep broken links from making the demo look broken.
+
+### What I deliberately left out for time
+
+- **Click and conversion analytics.** In production, OpenTable's own booking and click data
+  would feed back into ranking — `bookings_count` per restaurant would be the ideal
+  custom-ranking signal, directly closing the loop between search quality and revenue.
+- **A/B testing of relevance configurations.**
 
 ### On AI assistance
 
-I used AI assistance to accelerate implementation.
-I reviewed and adapted all output to the required parameters in the brief.
----
-
-## Deliverables
-
-- [Live demo]([ADD YOUR LIVE URL HERE])
-- [Git repository]([ADD YOUR REPO URL HERE])
-- [Customer answers](./customer-answers.md)
-- Setup instructions — see "How to run locally" above
-- Approach write-up — see "Approach & trade-offs" above
+I used AI assistance to accelerate implementation, and reviewed and adapted all output against
+the brief's constraints — JS Helper only, no InstantSearch, no fork. I can explain the
+architecture, trade-offs, and every data transformation behind what I built.
